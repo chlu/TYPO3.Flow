@@ -98,6 +98,9 @@ TYPO3:
         -
           position: 20
           className: TYPO3\Flow\Mvc\DispatchComponent
+        -
+          position: 1000
+          className: TYPO3\Flow\Http\Component\MakeStandardsCompliantComponent
 
     log:
 

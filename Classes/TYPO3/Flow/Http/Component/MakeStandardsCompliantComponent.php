@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\Flow\Mvc;
+namespace TYPO3\Flow\Http\Component;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow framework.                       *
@@ -11,29 +11,24 @@ namespace TYPO3\Flow\Mvc;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Annotations as Flow,
+	\TYPO3\Flow\Http\Request,
+	\TYPO3\Flow\Http\Response;
 
 /**
- * A dispatch component
+ * Make a Response standards compliant
  */
-class DispatchComponent implements \TYPO3\Flow\Http\Component\HttpComponentInterface {
+class MakeStandardsCompliantComponent implements HttpComponentInterface {
 
 	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Mvc\Dispatcher
-	 */
-	protected $dispatcher;
-
-	/**
-	 * Dispatch the stored ActionRequest to the Dispatcher for
-	 * handling the current HTTP request by an controller.
+	 * Just call makeStandardsCompliant on the Response for now
 	 *
 	 * @param \TYPO3\Flow\Http\Request $request
 	 * @param \TYPO3\Flow\Http\Response $response
 	 * @return TRUE If the chain should be stopped
 	 */
-	public function handle(\TYPO3\Flow\Http\Request $request, \TYPO3\Flow\Http\Response $response) {
-		$this->dispatcher->dispatch($request->getInternalArgument('actionRequest'), $response);
+	public function handle(Request $request, Response $response) {
+		$response->makeStandardsCompliant($request);
 	}
 
 }

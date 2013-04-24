@@ -66,6 +66,11 @@ class RequestHandler implements HttpRequestHandlerInterface {
 	protected $settings;
 
 	/**
+	 * @var \TYPO3\Flow\Http\Component\BaseComponentChainFactory
+	 */
+	protected $baseComponentChainFactory;
+
+	/**
 	 * Make exit() a closure so it can be manipulated during tests
 	 *
 	 * @var \Closure
@@ -115,19 +120,35 @@ class RequestHandler implements HttpRequestHandlerInterface {
 
 		$this->boot();
 		$this->resolveDependencies();
-		$this->request->injectSettings($this->settings);
+		if (isset($this->settings['http']['baseUri'])) {
+			$this->request->setBaseUri(new Uri($this->settings['http']['baseUri']));
+		}
 
-		$this->router->setRoutesConfiguration($this->routesConfiguration);
-		$actionRequest = $this->router->route($this->request);
-		$this->securityContext->setRequest($actionRequest);
+		// $this->router->setRoutesConfiguration($this->routesConfiguration);
+		// $actionRequest = $this->router->route($this->request);
+		// $this->securityContext->setRequest($actionRequest);
 
-		$this->dispatcher->dispatch($actionRequest, $this->response);
+		// $this->dispatcher->dispatch($actionRequest, $this->response);
 
-		$this->response->makeStandardsCompliant($this->request);
+		// $this->response->makeStandardsCompliant($this->request);
+
+		$component = $this->buildHttpComponent();
+		if ($component === NULL) {
+			throw new \TYPO3\Flow\Exception('Base component could not be created', 1366813775);
+		}
+		$component->handle($this->request, $this->response);
+
 		$this->response->send();
 
 		$this->bootstrap->shutdown('Runtime');
 		$this->exit->__invoke();
+	}
+
+	/**
+	 * @return \TYPO3\Flow\Http\Component\HttpComponentInterface
+	 */
+	protected function buildHttpComponent() {
+		return $this->baseComponentChainFactory->create($this->settings);
 	}
 
 	/**
@@ -169,15 +190,16 @@ class RequestHandler implements HttpRequestHandlerInterface {
 	 */
 	protected function resolveDependencies() {
 		$objectManager = $this->bootstrap->getObjectManager();
-		$this->dispatcher = $objectManager->get('TYPO3\Flow\Mvc\Dispatcher');
+		$this->baseComponentChainFactory = $objectManager->get('TYPO3\Flow\Http\Component\BaseComponentChainFactory');
+		// $this->dispatcher = $objectManager->get('TYPO3\Flow\Mvc\Dispatcher');
 
 		$configurationManager = $objectManager->get('TYPO3\Flow\Configuration\ConfigurationManager');
 		$this->settings = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'TYPO3.Flow');
 
-		$this->routesConfiguration = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_ROUTES);
-		$this->router = $objectManager->get('TYPO3\Flow\Mvc\Routing\Router');
+		// $this->routesConfiguration = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_ROUTES);
+		// $this->router = $objectManager->get('TYPO3\Flow\Mvc\Routing\Router');
 
-		$this->securityContext = $objectManager->get('TYPO3\Flow\Security\Context');
+		// $this->securityContext = $objectManager->get('TYPO3\Flow\Security\Context');
 	}
 }
 ?>

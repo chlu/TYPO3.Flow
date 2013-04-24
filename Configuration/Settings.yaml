@@ -91,6 +91,14 @@ TYPO3:
       # request (default).
       baseUri: NULL
 
+      chain:
+        -
+          position: 10
+          className: TYPO3\Flow\Mvc\Routing\RoutingComponent
+        -
+          position: 20
+          className: TYPO3\Flow\Mvc\DispatchComponent
+
     log:
 
       # Settings for TYPO3 Flow's default loggers

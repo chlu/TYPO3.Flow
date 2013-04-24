@@ -62,6 +62,11 @@ class Request extends Message {
 	protected $inputStreamUri = 'php://input';
 
 	/**
+	 * @var array
+	 */
+	protected $internalArguments = array();
+
+	/**
 	 * Constructs a new Request object based on the given environment data.
 	 *
 	 * @param array $get Data similar to that which is typically provided by $_GET
@@ -156,18 +161,6 @@ class Request extends Message {
 	}
 
 	/**
-	 * Injects the settings of this package
-	 *
-	 * @param array $settings
-	 * @return void
-	 */
-	public function injectSettings(array $settings) {
-		if (isset($settings['http']['baseUri']) && $settings['http']['baseUri'] !== NULL) {
-			$this->baseUri = new Uri($settings['http']['baseUri']);
-		}
-	}
-
-	/**
 	 * Creates a new Action Request request as a sub request to this HTTP request.
 	 * Maps the arguments of this request to the new Action Request.
 	 *
@@ -200,6 +193,13 @@ class Request extends Message {
 			$this->detectBaseUri();
 		}
 		return $this->baseUri;
+	}
+
+	/**
+	 * @param \TYPO3\Flow\Http\Uri $baseUri
+	 */
+	public function setBaseUri($baseUri) {
+		$this->baseUri = $baseUri;
 	}
 
 	/**
@@ -704,6 +704,22 @@ class Request extends Message {
 	static public function trimMediaType($rawMediaType) {
 		$pieces = self::parseMediaType($rawMediaType);
 		return trim(sprintf('%s/%s', $pieces['type'], $pieces['subtype']), '/') ?: NULL;
+	}
+
+	/**
+	 * @param string $argumentName
+	 * @return mixed
+	 */
+	public function getInternalArgument($argumentName) {
+		return $this->internalArguments[$argumentName];
+	}
+
+	/**
+	 * @param string $argumentName
+	 * @param mixed $value
+	 */
+	public function setInternalArgument($argumentName, $value) {
+		$this->internalArguments[$argumentName] = $value;
 	}
 }
 

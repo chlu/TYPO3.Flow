@@ -16,39 +16,38 @@ use TYPO3\Flow\Annotations as Flow,
 	\TYPO3\Flow\Http\Response;
 
 /**
- * The HTTP component chain
  *
- * The chain is a HTTP component itself and handles all the configured components until one
- * component returns FALSE.
  */
-class ComponentChain extends ComponentExecutor implements HttpComponentInterface {
+abstract class ComponentExecutor implements HttpComponentInterface {
 
 	/**
-	 * HTTP components
-	 * @var array
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Object\ObjectManagerInterface
 	 */
-	protected $components = array();
+	protected $objectManager;
 
 	/**
-	 * Handle the configured components in the order of the chain
+	 * Handle a component from string, array or instance
 	 *
+	 * @param mixed $component
 	 * @param \TYPO3\Flow\Http\Request $request
 	 * @param \TYPO3\Flow\Http\Response $response
-	 * @return FALSE If the chain should be stopped
 	 */
-	public function handle(Request $request, Response $response) {
-		foreach ($this->components as $component) {
-			if ($this->handleComponent($component, $request, $response) === FALSE) {
-				return FALSE;
+	protected function handleComponent($component, $request, $response) {
+		if ($component instanceof HttpComponentInterface) {
+			return $component->handle($request, $response);
+		} elseif (is_string($component)) {
+			$comp = $this->objectManager->get($component);
+			if ($comp instanceof HttpComponentInterface) {
+				return $comp->handle($request, $response);
+			} else {
+				// TODO Handle wrong object name / instance
 			}
+		} elseif (is_callable($component)) {
+			return $component($request, $response);
+		} else {
+			throw new \InvalidArgumentException('Given component of type "" is not callable and does not implement HttpComponentInterface', 1366812942);
 		}
-	}
-
-	/**
-	 * @param array $components
-	 */
-	public function setComponents($components) {
-		$this->components = $components;
 	}
 
 }

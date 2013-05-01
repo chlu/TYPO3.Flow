@@ -25,15 +25,39 @@ class DispatchComponent implements \TYPO3\Flow\Http\Component\HttpComponentInter
 	protected $dispatcher;
 
 	/**
-	 * Dispatch the stored ActionRequest to the Dispatcher for
-	 * handling the current HTTP request by an controller.
+	 * Create an action request from stored route match values and dispatch to that
 	 *
 	 * @param \TYPO3\Flow\Http\Request $request
 	 * @param \TYPO3\Flow\Http\Response $response
 	 * @return TRUE If the chain should be stopped
 	 */
 	public function handle(\TYPO3\Flow\Http\Request $request, \TYPO3\Flow\Http\Response $response) {
-		$this->dispatcher->dispatch($request->getInternalArgument('actionRequest'), $response);
+		$actionRequest = $request->createActionRequest();
+
+		$matchResults = $request->getInternalArgument('routeResults');
+		if ($matchResults !== NULL) {
+			$requestArguments = $actionRequest->getArguments();
+			$mergedArguments = \TYPO3\Flow\Utility\Arrays::arrayMergeRecursiveOverrule($requestArguments, $matchResults);
+			$actionRequest->setArguments($mergedArguments);
+		}
+		$this->setDefaultControllerAndActionNameIfNoneSpecified($actionRequest);
+
+		$this->dispatcher->dispatch($actionRequest, $response);
+	}
+
+	/**
+	 * Set the default controller and action names if none has been specified.
+	 *
+	 * @param \TYPO3\Flow\Mvc\ActionRequest $actionRequest
+	 * @return void
+	 */
+	protected function setDefaultControllerAndActionNameIfNoneSpecified($actionRequest) {
+		if ($actionRequest->getControllerName() === NULL) {
+			$actionRequest->setControllerName('Standard');
+		}
+		if ($actionRequest->getControllerActionName() === NULL) {
+			$actionRequest->setControllerActionName('index');
+		}
 	}
 
 }

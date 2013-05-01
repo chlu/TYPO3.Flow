@@ -400,6 +400,7 @@ class Route {
 			unset($routeValues['@format']);
 		}
 
+		// FIXME Move this out of Route
 		$this->throwExceptionIfTargetControllerDoesNotExist($mergedRouteValues);
 
 			// add query string

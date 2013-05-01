@@ -138,6 +138,18 @@ TYPO3\Flow\Monitor\FileMonitor:
           1:
             value: Flow_Monitor
 
+
+#
+# HTTP
+#
+
+TYPO3\Flow\Mvc\Routing\RoutingComponent:
+  properties:
+    # DispatchComponent is used to handle every route result by default if no @component was matched
+    notFoundComponent:
+      object: 'TYPO3\Flow\Mvc\DispatchComponent'
+
+
 #                                                                          #
 # MVC                                                                      #
 #                                                                          #

@@ -25,10 +25,11 @@ class MakeStandardsCompliantComponent implements HttpComponentInterface {
 	 *
 	 * @param \TYPO3\Flow\Http\Request $request
 	 * @param \TYPO3\Flow\Http\Response $response
-	 * @return TRUE If the chain should be stopped
+	 * @return FALSE If the chain should be stopped
 	 */
 	public function handle(Request $request, Response $response) {
 		$response->makeStandardsCompliant($request);
+		return TRUE;
 	}
 
 }

@@ -58,12 +58,6 @@ class Router implements \TYPO3\Flow\Mvc\Routing\RouterInterface {
 	protected $routesCreated = FALSE;
 
 	/**
-	 * The current request. Will be set in route()
-	 * @var \TYPO3\Flow\Mvc\ActionRequest
-	 */
-	protected $actionRequest;
-
-	/**
 	 * @var \TYPO3\Flow\Mvc\Routing\Route
 	 */
 	protected $lastMatchedRoute;
@@ -89,20 +83,12 @@ class Router implements \TYPO3\Flow\Mvc\Routing\RouterInterface {
 	 * parameters. If the request could not be routed, it will be left untouched.
 	 *
 	 * @param \TYPO3\Flow\Http\Request $httpRequest The web request to be analyzed. Will be modified by the router.
-	 * @return \TYPO3\Flow\Mvc\ActionRequest
+	 * @return array The results of the matching route
 	 */
 	public function route(\TYPO3\Flow\Http\Request $httpRequest) {
-		$this->actionRequest = $httpRequest->createActionRequest();
-
 		$routePath = substr($httpRequest->getUri()->getPath(), strlen($httpRequest->getBaseUri()->getPath()));
 		$matchResults = $this->findMatchResults($routePath);
-		if ($matchResults !== NULL) {
-			$requestArguments = $this->actionRequest->getArguments();
-			$mergedArguments = Arrays::arrayMergeRecursiveOverrule($requestArguments, $matchResults);
-			$this->actionRequest->setArguments($mergedArguments);
-		}
-		$this->setDefaultControllerAndActionNameIfNoneSpecified();
-		return $this->actionRequest;
+		return $matchResults;
 	}
 
 	/**
@@ -134,20 +120,6 @@ class Router implements \TYPO3\Flow\Mvc\Routing\RouterInterface {
 	public function addRoute(Route $route) {
 		$this->createRoutesFromConfiguration();
 		array_unshift($this->routes, $route);
-	}
-
-	/**
-	 * Set the default controller and action names if none has been specified.
-	 *
-	 * @return void
-	 */
-	protected function setDefaultControllerAndActionNameIfNoneSpecified() {
-		if ($this->actionRequest->getControllerName() === NULL) {
-			$this->actionRequest->setControllerName('Standard');
-		}
-		if ($this->actionRequest->getControllerActionName() === NULL) {
-			$this->actionRequest->setControllerActionName('index');
-		}
 	}
 
 	/**
@@ -243,6 +215,8 @@ class Router implements \TYPO3\Flow\Mvc\Routing\RouterInterface {
 	/**
 	 * Returns the object name of the controller defined by the package, subpackage key and
 	 * controller name
+	 *
+	 * TODO This is only used in the RoutingCommandController, should be moved to some other class
 	 *
 	 * @param string $packageKey the package key of the controller
 	 * @param string $subPackageKey the subpackage key of the controller
